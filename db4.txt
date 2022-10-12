@@ -1,0 +1,70 @@
+db.createCollection("department")
+db.dept.insertMany([
+    {
+      _id: "d01", 
+      name: "Finance", 
+      place: "Bengaluru"
+    }, 
+    {
+      _id: "d02", 
+      name: "IT",
+      place: "Bengaluru"
+    }
+  ])
+
+
+db.createCollection("project")
+db.project.insertMany([
+    {
+      _id:"p01", 
+      title: "Application development", 
+      deptId: "d02"
+    }, 
+    {
+      _id:"p02", 
+      title:"finance audit", 
+      deptId: "d03"
+    }
+  ])
+
+
+db.createCollection("employee")
+db.employee.insertMany([
+      {
+        ssn: "e01", 
+        ename: "abc",
+        gender: "male",
+        salary: 20000,
+        qualification: "MCA",
+        exp: 2,
+        designation: "Senior Software Engineer",
+        deptId: "d02", 
+        projects: [
+          {
+            projectId: "p1", 
+            hours: 20
+          }
+        ]
+      }
+    ])
+
+
+4.2
+db.employee.find().sort({"ssn":1})
+
+4.3
+db.employee.find({deptId:db.dept.aggregate([{$match:{name:"Finance"}},{$project:{_id:1}}]).toArray()[0]._id})
+
+4.4
+db.employee.find({salary:db.employee.aggregate([{$group:{_id:null,maxsal:{$max:'$salary'}}}]).toArray()[0].maxsal})
+
+4.5
+db.employee.update(
+	{_id:db.employee.aggregate(
+      [{$project:{count:{$size:'$projects'}}},{$sort:{'count':-1}}]).toArray()[0]._id},{$set:{"award":"Employee of the year"}
+    }
+  )
+
+4.6
+db.employee.deleteOne({exp:db.employee.aggregate([{$group:{_id:null,minExp:{$min:'$exp'}}}]).toArray()[0].minExp})
+
